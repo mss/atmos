@@ -5,6 +5,7 @@ import (
 	"os"
 	osexec "os/exec"
 	"path"
+	"slices"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -253,7 +254,9 @@ func ExecuteTerraform(info schema.ConfigAndStacksInfo) error {
 
 	// Set `TF_IN_AUTOMATION` ENV var to `true` to suppress verbose instructions after terraform commands
 	// https://developer.hashicorp.com/terraform/cli/config/environment-variables#tf_in_automation
-	info.ComponentEnvList = append(info.ComponentEnvList, "TF_IN_AUTOMATION=true")
+	if slices.IndexFunc(info.ComponentEnvList, func(s string) bool { return strings.HasPrefix(s, "TF_IN_AUTOMATION=") }) == -1 {
+		info.ComponentEnvList = append(info.ComponentEnvList, "TF_IN_AUTOMATION=true")
+	}
 
 	// Print ENV vars if they are found in the component's stack config
 	if len(info.ComponentEnvList) > 0 {
